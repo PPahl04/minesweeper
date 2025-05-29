@@ -11,12 +11,12 @@
     <body onload="setUpField('10x20')">
         <h1 id="title">Welcome to minesweeper!</h1>
         <h2 id="subtitle">Good luck!</h2>
-        <button class="resetbtn" onclick="resetGame()">
-           Reset
-        </button>
+        <button class="resetbtn" onclick="resetGame()"> Reset </button>
         <div id="gameField"></div>
-        <p id="remainingFlags"></p> 
-        <p id="missingBombs"></p> 
+        <div class="debug">
+            <p id="remainingFlags"></p> 
+            <p id="missingBombs"></p> 
+        </div>
         <div class="field-sizes">
             <h2>Change Diffuculty:</h2>
             <button onclick="resetGame('5x15')">easy - 5x15</button>

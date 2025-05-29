@@ -350,7 +350,7 @@ function revealBoard(wonGame) {
             
             fieldEl.onclick = ( ) => { };
             fieldEl.oncontextmenu = ( ) => { };
-            fieldEl.onmouseover = ( ) => { };
+            fieldEl.onmouseenter = ( ) => { };
 
             fieldEl.textContent = fieldObj.isBomb ? "💣" : fieldObj.neighboringBombs;
             fieldEl.className = "field";
@@ -364,7 +364,7 @@ function setFlag(cursor, fieldObj) {
     cursor.preventDefault();
 
     //prevent player from putting more flags than the amount of existing bombs
-    if (_remainingFlags <= 0 || fieldObj.isRevealed) {
+    if (_setFlags >= _bombsInGF || fieldObj.isRevealed) {
         return;
     }
 
@@ -379,7 +379,7 @@ function setFlag(cursor, fieldObj) {
 
 //resets the game by refilling the board with the same fieldSize
 function resetGame(newFieldSize) {
-    changeTitles("Goodluck!", ["Break a leg!", "You got it!", `${_playCount+1}th try's a charm`]);
+    changeTitles("Goodluck!", ["Break a leg!", "You got it!", `${_playCount}th try's a charm`]);
     setUpField(newFieldSize ?? _currentBoardSize);
 }
 
@@ -393,6 +393,6 @@ function confirmCustomSize() {
         alert("Please choose a value between 5 and 99.");
         return;
     }
-    changeTitles("Goodluck!", ["Break a leg!", "You got it!", `${_playCount+1}th try's a charm`]);
+    changeTitles("Goodluck!", ["Break a leg!", "You got it!", `${_playCount}th try's a charm`]);
     setUpField(`${customRow}x${customColumn}`);
 }

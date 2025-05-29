@@ -85,7 +85,7 @@ h3 {
 }
 
 .custom-size input {
-    width: 58px;
+    width: 60px;
 }
 
 .custom-size > p,
@@ -121,11 +121,14 @@ button:hover {
     background: #a9f7a9;
 }
 
-#remainingFlags {
-    margin: 10px auto 0;
-}
 
 .resetbtn {
     border: 4px inset #7a428a;
     border-bottom: none;
+}
+
+.debug {
+    display: flex;
+    justify-content: space-around;
+    width: 70%;
 }
