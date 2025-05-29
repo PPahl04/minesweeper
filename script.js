@@ -5,7 +5,7 @@ let _gameBoard;
 //contains all fields within the gameField 
 let _board = []
 
-let _playCount = 1;
+let _lossStreakCount = 0;
 let _bombsInGF;
 let _setFlags;
 
@@ -342,8 +342,8 @@ function isGameFinished() {
 //this reveals all fields and disable clicking on them
 //will only be called when the game is finished or lost
 function revealBoard(wonGame) {
-    _gameBoard.className = wonGame ? _gameBoard.className+" won" : _gameBoard.className; 
-    _playCount++;
+    _gameBoard.className = wonGame ? _gameBoard.className+"won" : _gameBoard.className; 
+    _lossStreakCount = wonGame ? 0 : _lossStreakCount+1;
 
     _board.forEach((row) => {
         row.forEach((fieldObj) => {
@@ -386,8 +386,9 @@ function setFlag(cursor, fieldObj) {
 
 //resets the game by refilling the board with the same fieldSize
 function resetGame(newFieldSize) {
-    changeTitles("Goodluck!", ["Break a leg!", "You got it!", `${_playCount}th try's a charm`]);
-    setUpField(newFieldSize ?? _currentBoardSize);
+        changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
+                                                          _lossStreakCount+1 == 2 ? "nd " : 
+                                                          _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);    setUpField(newFieldSize ?? _currentBoardSize); 
 }
 
 //accepts the custom size if its valid
@@ -400,6 +401,8 @@ function confirmCustomSize() {
         alert("Please choose a value between 5 and 99.");
         return;
     }
-    changeTitles("Goodluck!", ["Break a leg!", "You got it!", `${_playCount}th try's a charm`]);
+    changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
+                                                      _lossStreakCount+1 == 2 ? "nd " : 
+                                                      _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);
     setUpField(`${customRow}x${customColumn}`);
 }
