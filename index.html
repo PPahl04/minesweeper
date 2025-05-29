@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="de">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+    <head>
+        <meta charset="utf-8"/>
+        <meta content="text/css"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Minesweeper</title>
+    </head>
+    <body onload="setUpField('10x20')">
+        <h1 id="title">Welcome to minesweeper!</h1>
+        <h2 id="subtitle">Good luck!</h2>
+        <button class="resetbtn" onclick="resetGame()">
+           Reset
+        </button>
+        <div id="gameField"></div>
+        <p id="remainingFlags"></p> 
+        <p id="missingBombs"></p> 
+        <div class="field-sizes">
+            <h2>Change Diffuculty:</h2>
+            <button onclick="resetGame('5x15')">easy - 5x15</button>
+            <button onclick="resetGame('10x20')">normal - 10x20</button>
+            <button onclick="resetGame('20x30')">hard - 20x30</button>
+            <h2 class="custom-size-title">Custom size:</h2>
+            <div class="custom-size">
+                <input type="number" id="customRow" min="5" max="99" placeholder="row">
+                <p>X</p>
+                <input type="number" id="customColumn" min="5" max="99" placeholder="column">
+                <button class="confirm-custom-size" onclick="confirmCustomSize()">Confirm</button>
+            </div>
+        </div>
+    </body>
+</html>

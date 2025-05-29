@@ -1,0 +1,131 @@
+.empty.field {
+    background: #b182be;
+}
+
+.empty.field.won-game {
+    background: #82be8a;
+}
+
+.empty.field:hover,
+.bomb.field:hover, 
+.finished:hover {
+    filter: none;
+    cursor: default;
+}
+
+body {
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    background: #f8deff;
+}
+
+h1,
+.field-sizes {
+    color: #451b50;
+    border: 1px solid #7a428a;
+    padding: 5px;
+    background: #fbefff;
+}
+
+.custom-size-title {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 2px #7a428a dashed;
+    margin-bottom: 0;
+} 
+
+h2 , h3 {
+    margin: 5px;
+}
+
+h1 {
+    font-size: 200%;
+    margin: 10px auto 0;
+}
+
+h2 {
+    font-size: 130%;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    margin: 0 auto 10px;
+    font-size: 100%;
+}
+
+h3 {
+    font-size: 100%;
+}
+
+#gameField {
+    display: grid;
+    justify-content: center;
+    grid-template-rows: auto;
+    gap: 2px;
+    margin: 0 auto;
+    padding: 5px;
+    background: #fbefff;
+    border: 5px inset #7a428a;
+}
+
+#gameField.won {
+    background: #f2ffef;
+}
+
+.field-sizes {
+    padding: 10px;
+}
+
+.custom-size {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.custom-size input {
+    width: 58px;
+}
+
+.custom-size > p,
+.custom-size > button,
+.custom-size > input {
+    margin: 10px 0px 5px;
+}
+
+button {
+    border: 1px #7a428a solid;
+    background: #e6a9f7;
+    color: #7a428a;
+    font-size: 100%;
+}
+
+button:hover {
+    filter: brightness(60%);
+    cursor: pointer;
+}
+
+.field {
+    width: 25px;
+    height: 25px;
+    font-size: 80%;
+    font-weight: bold;
+}
+
+.hovering {
+    filter: brightness(85%);
+}
+
+.won-game {
+    background: #a9f7a9;
+}
+
+#remainingFlags {
+    margin: 10px auto 0;
+}
+
+.resetbtn {
+    border: 4px inset #7a428a;
+    border-bottom: none;
+}
