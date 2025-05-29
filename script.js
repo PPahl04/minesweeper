@@ -134,6 +134,7 @@ function setUpField(boardSize) {
 function setFieldNumbers(maxRows, maxColumns) {
     _board.forEach((row) => {
         row.forEach((fieldObj) => {
+                //ignore bombs since they shouldnt have numbers
                 if (fieldObj.isBomb) {
                     createFieldElement(fieldObj);
                     return;
@@ -158,7 +159,6 @@ function setFieldNumbers(maxRows, maxColumns) {
                             continue;
                         }
 
-                        //console.log(`row: ${r}, col: ${c}`)
                         const neighbor = _board[r][c];
                         fieldObj.neighbors[rowForNeighbors][colForNeighbors] = neighbor;
                         neighboringBombs = neighbor.isBomb ? neighboringBombs+1 : neighboringBombs
@@ -187,14 +187,16 @@ function createFieldElement(fieldObj) {
     _gameBoard.append(fieldEl);
 }
 
-//highlight the neigbors of a uncovered field by adding a classname
+//highlight the neigbors of an uncovered field by adding a classname
 function onFieldEnter(fieldObj) {
+    //only neighbors of uncovered fields should be marked
     if (!fieldObj.isRevealed) {
         return;
     }
 
     fieldObj.neighbors.forEach((fieldRows) => {
         fieldRows.forEach((neighbor) => {
+            //ignore uncovered and flagged neighbors since they wont be affected by chording
             if (neighbor.isRevealed || neighbor.isFlagged) {
                 return;
             }
@@ -208,12 +210,14 @@ function onFieldEnter(fieldObj) {
 
 //remove a classname of the neighbors from an uncovered field so its not highlighted anymore
 function onFieldLeave(fieldObj) {
+    //ignore covered fields since their neigbors wont be marked
     if (!fieldObj.isRevealed) {
         return;
     }
 
     fieldObj.neighbors.forEach((fieldRows) => {
         fieldRows.forEach((neighbor) => {
+            //ignore uncovered and flagged neighbors since they wont be marked
             if (neighbor.isRevealed || neighbor.isFlagged) {
                 return;
             }
@@ -258,26 +262,28 @@ function fieldClicked(fieldObj) {
     }
 }
 
+//uncover neighbors if the flags on the neighbors is equal/greater than the neigboring bombs
 function fieldChord(fieldObj) {
     let flaggedNeighbors = 0;
     fieldObj.neighbors.forEach((fieldRows) => {
         fieldRows.forEach((neighbor) => {
+            //ignore self
             if (neighbor === fieldObj) {
                 return;
             }
-
             flaggedNeighbors = neighbor.isFlagged ? flaggedNeighbors+1 : flaggedNeighbors;
         })
     })
 
     if (flaggedNeighbors >= fieldObj.neighboringBombs){
-        //uncover neigbors
             fieldObj.neighbors.forEach((fieldRows) => {
                 fieldRows.forEach((neighbor) => {
-                    if (neighbor === fieldObj || neighbor.isRevealed) {
+                    //ignore self, uncovered and flagged fields
+                    if (neighbor === fieldObj || neighbor.isRevealed || neighbor.isFlagged) {
                         return;
                     }
                     
+                    //uncover neigbors
                     fieldClicked(neighbor);
                 })
         })
@@ -293,10 +299,12 @@ function uncoverNeighboringFields(fieldObj) {
 
     fieldObj.neighbors.forEach((fieldRows) => {
         fieldRows.forEach((neighbor) => {
+            //ignore self and uncovered fields
             if (neighbor === fieldObj || neighbor.isRevealed) {
                 return;
             }
             neighbor.isRevealed = true;
+            neighbor.htmlElement.className = "field";
             neighbor.htmlElement.textContent = neighbor.neighboringBombs;
 
             //give player their flag back
@@ -329,6 +337,7 @@ function isGameFinished() {
 
     _board.forEach((row) => {
         row.forEach((fieldObj) => {
+                //ignore bombs since they shouldnt be uncovered to win
                 if (fieldObj.isBomb) {
                     return;
                 }
