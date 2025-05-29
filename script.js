@@ -293,21 +293,22 @@ function uncoverNeighboringFields(fieldObj) {
 
     fieldObj.neighbors.forEach((fieldRows) => {
         fieldRows.forEach((neighbor) => {
-            if (neighbor === fieldObj) {
+            if (neighbor === fieldObj || neighbor.isRevealed) {
                 return;
             }
+            neighbor.isRevealed = true;
+            neighbor.htmlElement.textContent = neighbor.neighboringBombs;
 
-            if (neighbor.neighboringBombs == _noNeighboringBombs && !neighbor.isRevealed) {
-                neighbor.isRevealed = true;
-                neighbor.htmlElement.textContent = neighbor.neighboringBombs;
-                neighbor.htmlElement.className = "empty field";
-
-                uncoverNeighboringFields(neighbor);
+            //give player their flag back
+            if (neighbor.isFlagged) {
+                _setFlags--;
+                neighbor.isFlagged = false;
+                _remainingFlags.textContent = `Remaining flags: ${_bombsInGF-_setFlags}/${_bombsInGF}`;
             }
-            else if (neighbor.neighboringBombs != _noNeighboringBombs && !neighbor.isRevealed) {
-                neighbor.isRevealed = true;
-                neighbor.htmlElement.textContent = neighbor.neighboringBombs;
-                neighbor.htmlElement.className = "field";
+
+            if (neighbor.neighboringBombs == _noNeighboringBombs) {
+                neighbor.htmlElement.className = "empty field";
+                uncoverNeighboringFields(neighbor);
             }
         })
     })
@@ -363,18 +364,24 @@ function revealBoard(wonGame) {
 function setFlag(cursor, fieldObj) {
     cursor.preventDefault();
 
-    //prevent player from putting more flags than the amount of existing bombs
-    if (_setFlags >= _bombsInGF || fieldObj.isRevealed) {
+    if (fieldObj.isRevealed) {
         return;
     }
 
-    fieldObj.htmlElement.className = "field";
-    fieldObj.htmlElement.textContent = fieldObj._isFlagged ? "" : "🚩";
+    //remove the flag
+    if (fieldObj.isFlagged) {
+        _setFlags--;
+        fieldObj._isFlagged = false;
+        fieldObj.htmlElement.textContent = "";
+    }
+    //only add a flag if the amount of set flags is lesser than the amount of bombs
+    else if (_setFlags < _bombsInGF){
+        _setFlags++;
+        fieldObj._isFlagged = true;
+        fieldObj.htmlElement.textContent = "🚩";
+    }
 
-    _setFlags = fieldObj._isFlagged ? _setFlags-1 : _setFlags+1;
-    fieldObj._isFlagged = !fieldObj._isFlagged;
     _remainingFlags.textContent = `Remaining flags: ${_bombsInGF-_setFlags}/${_bombsInGF}`;
-    return;
 }
 
 //resets the game by refilling the board with the same fieldSize
