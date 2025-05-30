@@ -5,7 +5,7 @@ let _gameBoard;
 //contains all fields within the gameField 
 let _board = []
 
-let _playCount = 1;
+let _lossStreakCount = 0;
 let _bombsInGF;
 let _setFlags;
 
@@ -134,6 +134,7 @@ function setUpField(boardSize) {
 function setFieldNumbers(maxRows, maxColumns) {
     _board.forEach((row) => {
         row.forEach((fieldObj) => {
+                //ignore bombs since they shouldnt have numbers
                 if (fieldObj.isBomb) {
                     createFieldElement(fieldObj);
                     return;
@@ -158,7 +159,6 @@ function setFieldNumbers(maxRows, maxColumns) {
                             continue;
                         }
 
-                        //console.log(`row: ${r}, col: ${c}`)
                         const neighbor = _board[r][c];
                         fieldObj.neighbors[rowForNeighbors][colForNeighbors] = neighbor;
                         neighboringBombs = neighbor.isBomb ? neighboringBombs+1 : neighboringBombs
@@ -187,14 +187,16 @@ function createFieldElement(fieldObj) {
     _gameBoard.append(fieldEl);
 }
 
-//highlight the neigbors of a uncovered field by adding a classname
+//highlight the neigbors of an uncovered field by adding a classname
 function onFieldEnter(fieldObj) {
+    //only neighbors of uncovered fields should be marked
     if (!fieldObj.isRevealed) {
         return;
     }
 
     fieldObj.neighbors.forEach((fieldRows) => {
         fieldRows.forEach((neighbor) => {
+            //ignore uncovered and flagged neighbors since they wont be affected by chording
             if (neighbor.isRevealed || neighbor.isFlagged) {
                 return;
             }
@@ -208,12 +210,14 @@ function onFieldEnter(fieldObj) {
 
 //remove a classname of the neighbors from an uncovered field so its not highlighted anymore
 function onFieldLeave(fieldObj) {
+    //ignore covered fields since their neigbors wont be marked
     if (!fieldObj.isRevealed) {
         return;
     }
 
     fieldObj.neighbors.forEach((fieldRows) => {
         fieldRows.forEach((neighbor) => {
+            //ignore uncovered and flagged neighbors since they wont be marked
             if (neighbor.isRevealed || neighbor.isFlagged) {
                 return;
             }
@@ -258,26 +262,28 @@ function fieldClicked(fieldObj) {
     }
 }
 
+//uncover neighbors if the flags on the neighbors is equal/greater than the neigboring bombs
 function fieldChord(fieldObj) {
     let flaggedNeighbors = 0;
     fieldObj.neighbors.forEach((fieldRows) => {
         fieldRows.forEach((neighbor) => {
+            //ignore self
             if (neighbor === fieldObj) {
                 return;
             }
-
             flaggedNeighbors = neighbor.isFlagged ? flaggedNeighbors+1 : flaggedNeighbors;
         })
     })
 
     if (flaggedNeighbors >= fieldObj.neighboringBombs){
-        //uncover neigbors
             fieldObj.neighbors.forEach((fieldRows) => {
                 fieldRows.forEach((neighbor) => {
-                    if (neighbor === fieldObj || neighbor.isRevealed) {
+                    //ignore self, uncovered and flagged fields
+                    if (neighbor === fieldObj || neighbor.isRevealed || neighbor.isFlagged) {
                         return;
                     }
                     
+                    //uncover neigbors
                     fieldClicked(neighbor);
                 })
         })
@@ -293,21 +299,24 @@ function uncoverNeighboringFields(fieldObj) {
 
     fieldObj.neighbors.forEach((fieldRows) => {
         fieldRows.forEach((neighbor) => {
-            if (neighbor === fieldObj) {
+            //ignore self and uncovered fields
+            if (neighbor === fieldObj || neighbor.isRevealed) {
                 return;
             }
+            neighbor.isRevealed = true;
+            neighbor.htmlElement.className = "field";
+            neighbor.htmlElement.textContent = neighbor.neighboringBombs;
 
-            if (neighbor.neighboringBombs == _noNeighboringBombs && !neighbor.isRevealed) {
-                neighbor.isRevealed = true;
-                neighbor.htmlElement.textContent = neighbor.neighboringBombs;
-                neighbor.htmlElement.className = "empty field";
-
-                uncoverNeighboringFields(neighbor);
+            //give player their flag back
+            if (neighbor.isFlagged) {
+                _setFlags--;
+                neighbor.isFlagged = false;
+                _remainingFlags.textContent = `Remaining flags: ${_bombsInGF-_setFlags}/${_bombsInGF}`;
             }
-            else if (neighbor.neighboringBombs != _noNeighboringBombs && !neighbor.isRevealed) {
-                neighbor.isRevealed = true;
-                neighbor.htmlElement.textContent = neighbor.neighboringBombs;
-                neighbor.htmlElement.className = "field";
+
+            if (neighbor.neighboringBombs == _noNeighboringBombs) {
+                neighbor.htmlElement.className = "empty field";
+                uncoverNeighboringFields(neighbor);
             }
         })
     })
@@ -328,6 +337,7 @@ function isGameFinished() {
 
     _board.forEach((row) => {
         row.forEach((fieldObj) => {
+                //ignore bombs since they shouldnt be uncovered to win
                 if (fieldObj.isBomb) {
                     return;
                 }
@@ -341,8 +351,8 @@ function isGameFinished() {
 //this reveals all fields and disable clicking on them
 //will only be called when the game is finished or lost
 function revealBoard(wonGame) {
-    _gameBoard.className = wonGame ? _gameBoard.className+" won" : _gameBoard.className; 
-    _playCount++;
+    _gameBoard.className = wonGame ? _gameBoard.className+"won" : _gameBoard.className; 
+    _lossStreakCount = wonGame ? 0 : _lossStreakCount+1;
 
     _board.forEach((row) => {
         row.forEach((fieldObj) => {
@@ -350,7 +360,7 @@ function revealBoard(wonGame) {
             
             fieldEl.onclick = ( ) => { };
             fieldEl.oncontextmenu = ( ) => { };
-            fieldEl.onmouseover = ( ) => { };
+            fieldEl.onmouseenter = ( ) => { };
 
             fieldEl.textContent = fieldObj.isBomb ? "💣" : fieldObj.neighboringBombs;
             fieldEl.className = "field";
@@ -363,24 +373,31 @@ function revealBoard(wonGame) {
 function setFlag(cursor, fieldObj) {
     cursor.preventDefault();
 
-    //prevent player from putting more flags than the amount of existing bombs
-    if (_remainingFlags <= 0 || fieldObj.isRevealed) {
+    if (fieldObj.isRevealed) {
         return;
     }
 
-    fieldObj.htmlElement.className = "field";
-    fieldObj.htmlElement.textContent = fieldObj._isFlagged ? "" : "🚩";
+    //remove the flag
+    if (fieldObj.isFlagged) {
+        _setFlags--;
+        fieldObj._isFlagged = false;
+        fieldObj.htmlElement.textContent = "";
+    }
+    //only add a flag if the amount of set flags is lesser than the amount of bombs
+    else if (_setFlags < _bombsInGF){
+        _setFlags++;
+        fieldObj._isFlagged = true;
+        fieldObj.htmlElement.textContent = "🚩";
+    }
 
-    _setFlags = fieldObj._isFlagged ? _setFlags-1 : _setFlags+1;
-    fieldObj._isFlagged = !fieldObj._isFlagged;
     _remainingFlags.textContent = `Remaining flags: ${_bombsInGF-_setFlags}/${_bombsInGF}`;
-    return;
 }
 
 //resets the game by refilling the board with the same fieldSize
 function resetGame(newFieldSize) {
-    changeTitles("Goodluck!", ["Break a leg!", "You got it!", `${_playCount+1}th try's a charm`]);
-    setUpField(newFieldSize ?? _currentBoardSize);
+        changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
+                                                          _lossStreakCount+1 == 2 ? "nd " : 
+                                                          _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);    setUpField(newFieldSize ?? _currentBoardSize); 
 }
 
 //accepts the custom size if its valid
@@ -393,6 +410,8 @@ function confirmCustomSize() {
         alert("Please choose a value between 5 and 99.");
         return;
     }
-    changeTitles("Goodluck!", ["Break a leg!", "You got it!", `${_playCount+1}th try's a charm`]);
+    changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
+                                                      _lossStreakCount+1 == 2 ? "nd " : 
+                                                      _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);
     setUpField(`${customRow}x${customColumn}`);
 }
