@@ -99,7 +99,7 @@ function setUpField(boardSize) {
     _remainingFlags.textContent = `Remaining flags: ${_bombsInGF}/${_bombsInGF}`;
 
     _currentBoardSize = boardSize;
-    let tempBombs = _bombsInGF;
+    let bombList = initBombList(maxRows, maxColumns);
     _setFlags = 0;
 
     _gameBoard.className = "";
@@ -112,22 +112,44 @@ function setUpField(boardSize) {
         _board[r] = [];
 
         for (let c = 0; c < maxColumns; c++) {
-            let rand = Math.floor(Math.random() * _fracNumBombs);
-            let isBomb = false;
-
-            if (rand == 3 && tempBombs > 0){
-                isBomb = true;
-                tempBombs--;
-            }
-
+            //init a field and pass its row, column and if its a bomb
+            let isBomb = bombList.pop();
             const fieldObj = new Field(r, c, isBomb);
             _board[r][c] = fieldObj;
         }   
     }
 
     setFieldNumbers(maxRows, maxColumns);
-    let missingBombs = document.getElementById("missingBombs");
-    missingBombs.textContent = `Missing Bombs: ${tempBombs}`;
+}
+
+//creates a list that contains all bombs of the board
+function initBombList(rows, cols) {
+    let tmpBombs = _bombsInGF;
+    let boardSize = rows * cols;
+    let bombList = [];
+
+    //set the correct amount of bombs within the boardSize first try
+    for (let i = 0; i < boardSize; i++) {
+        let rand = Math.floor(Math.random() * _fracNumBombs);
+    
+        if (rand == 3 && tmpBombs > 0) {
+            bombList[i] = true;
+            tmpBombs--;
+        }
+        else {
+            bombList[i] = false;
+        }
+    }
+
+    //put in more bombs in case the borad is missing some
+    while (tmpBombs > 0) {
+        let rand = Math.floor(Math.random() * boardSize-1);
+        if (!bombList[rand]) {
+            bombList[rand] = true;
+            tmpBombs--;
+        }
+    }
+    return bombList;
 }
 
 //sets the bomb number of each field by checking if the surrounding fields are bombs
