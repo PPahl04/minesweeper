@@ -127,8 +127,19 @@ button:hover {
     border-bottom: none;
 }
 
-.debug {
+
+.board-info {
     display: flex;
     justify-content: space-around;
-    width: 70%;
+    width: 25em;
+    margin: 0 auto 20px;
+    border: 4px inset #7a428a;
+    border-top: 4px inset #7a428a;
+    transform: translateY(-4px);
+    background: #fbefff;
+    z-index: -1;
+}
+
+.board-info > p {
+    margin: 10px auto;
 }

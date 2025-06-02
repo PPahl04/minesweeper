@@ -1,12 +1,18 @@
-let _currentBoardSize;
-let _remainingFlags;
-let _gameBoard;
-
 //contains all fields within the gameField 
 let _board = []
 
-let _lossStreakCount = 0;
+let _currentBoardRowAndCol;
+let _fieldAmount;
 let _bombsInGF;
+
+//htmlElements
+let _remainingFlags;
+let _boardProgress;
+let _gameBoard;
+
+//player specific elements
+let _lossStreakCount = 0;
+let _uncoveredFields;
 let _setFlags;
 
 const _fracNumBombs = 4;
@@ -87,21 +93,25 @@ class Field {
 }
 
 //creates the game field in the gameField element
-function setUpField(boardSize) {
+function setUpField(boardRowAndCol) {
     _remainingFlags = document.getElementById("remainingFlags");
     _gameBoard = document.getElementById("gameField");
-    
-    let maxRows = boardSize.split("x")[0];
-    let maxColumns = boardSize.split("x")[1];
+    _boardProgress = document.getElementById("boardProgress");
+
+    let maxRows = boardRowAndCol.split("x")[0];
+    let maxColumns = boardRowAndCol.split("x")[1];
+    _fieldAmount = maxRows * maxColumns;
 
     // determine the amount of bombs based on the field size
     _bombsInGF = Math.round((maxRows * maxColumns) / _fracNumBombs);
     _remainingFlags.textContent = `Remaining flags: ${_bombsInGF}/${_bombsInGF}`;
-
-    _currentBoardSize = boardSize;
+    _boardProgress.textContent = `Covered fields: ${_fieldAmount-_bombsInGF}/${_fieldAmount-_bombsInGF}`;
+    
+    _currentBoardRowAndCol = boardRowAndCol;
     let bombList = initBombList(maxRows, maxColumns);
     _setFlags = 0;
-
+    _uncoveredFields = 0;
+    
     _gameBoard.className = "";
     _gameBoard.style.gridTemplateColumns = `repeat(${maxColumns}, auto`;
 
@@ -264,7 +274,6 @@ function fieldClicked(fieldObj) {
     }
     // player wants to use chord
     else if(fieldObj.isRevealed) {
-        //check if theres a correct amount of flags placed around it
         fieldChord(fieldObj);
         return;
     }
@@ -272,6 +281,7 @@ function fieldClicked(fieldObj) {
     fieldObj.isRevealed = true;
     fieldObj.htmlElement.textContent = fieldObj.neighboringBombs;
     fieldObj.htmlElement.className = fieldObj.neighboringBombs == _noNeighboringBombs ? "empty field" : "field";
+    changeBoardProgress();
     
     if (fieldObj.neighboringBombs == _noNeighboringBombs) {
         uncoverNeighboringFields(fieldObj);
@@ -297,6 +307,7 @@ function fieldChord(fieldObj) {
         })
     })
 
+    //check if theres a correct amount of flags placed around it
     if (flaggedNeighbors >= fieldObj.neighboringBombs){
             fieldObj.neighbors.forEach((fieldRows) => {
                 fieldRows.forEach((neighbor) => {
@@ -310,6 +321,11 @@ function fieldChord(fieldObj) {
                 })
         })
     }
+}
+
+function changeBoardProgress() {
+    _uncoveredFields++;
+    _boardProgress.textContent = `Covered fields: ${(_fieldAmount - _bombsInGF) -_uncoveredFields}/${_fieldAmount - _bombsInGF}`;
 }
 
 //uncovers neighbors if the current field has no neigboring bombs
@@ -328,14 +344,16 @@ function uncoverNeighboringFields(fieldObj) {
             neighbor.isRevealed = true;
             neighbor.htmlElement.className = "field";
             neighbor.htmlElement.textContent = neighbor.neighboringBombs;
+            changeBoardProgress();
 
-            //give player their flag back
+           //give player their flag back
             if (neighbor.isFlagged) {
                 _setFlags--;
                 neighbor.isFlagged = false;
                 _remainingFlags.textContent = `Remaining flags: ${_bombsInGF-_setFlags}/${_bombsInGF}`;
             }
 
+            //continue uncovering fields that have no bombs as neigbors!!!
             if (neighbor.neighboringBombs == _noNeighboringBombs) {
                 neighbor.htmlElement.className = "empty field";
                 uncoverNeighboringFields(neighbor);
@@ -419,7 +437,7 @@ function setFlag(cursor, fieldObj) {
 function resetGame(newFieldSize) {
         changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
                                                           _lossStreakCount+1 == 2 ? "nd " : 
-                                                          _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);    setUpField(newFieldSize ?? _currentBoardSize); 
+                                                          _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);    setUpField(newFieldSize ?? _currentBoardRowAndCol); 
 }
 
 //accepts the custom size if its valid
