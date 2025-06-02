@@ -1,7 +1,7 @@
 //contains all fields within the gameField 
 let _board = []
 
-let _currentBoardRowAndCol;
+let _currentBoardSize;
 let _fieldAmount;
 let _bombsInGF;
 
@@ -93,13 +93,14 @@ class Field {
 }
 
 //creates the game field in the gameField element
-function setUpField(boardRowAndCol) {
+function setUpField(newBoardSize) {
+    //get htmlElements
     _remainingFlags = document.getElementById("remainingFlags");
-    _gameBoard = document.getElementById("gameField");
+    _gameBoard = document.getElementById("gameBoard");
     _boardProgress = document.getElementById("boardProgress");
 
-    let maxRows = boardRowAndCol.split("x")[0];
-    let maxColumns = boardRowAndCol.split("x")[1];
+    let maxRows = newBoardSize.split("x")[0];
+    let maxColumns = newBoardSize.split("x")[1];
     _fieldAmount = maxRows * maxColumns;
 
     // determine the amount of bombs based on the field size
@@ -107,13 +108,14 @@ function setUpField(boardRowAndCol) {
     _remainingFlags.textContent = `Remaining flags: ${_bombsInGF}/${_bombsInGF}`;
     _boardProgress.textContent = `Covered fields: ${_fieldAmount-_bombsInGF}/${_fieldAmount-_bombsInGF}`;
     
-    _currentBoardRowAndCol = boardRowAndCol;
+    _currentBoardSize = newBoardSize;
     let bombList = initBombList(maxRows, maxColumns);
     _setFlags = 0;
     _uncoveredFields = 0;
     
     _gameBoard.className = "";
     _gameBoard.style.gridTemplateColumns = `repeat(${maxColumns}, auto`;
+    _gameBoard.oncontextmenu = (e) => { e.preventDefault(); }
 
     //clear boards
     _board = [];
@@ -153,6 +155,7 @@ function initBombList(rows, cols) {
 
     //put in more bombs in case the borad is missing some
     while (tmpBombs > 0) {
+        //select random fields to be bombs, if its not already one
         let rand = Math.floor(Math.random() * boardSize-1);
         if (!bombList[rand]) {
             bombList[rand] = true;
@@ -166,42 +169,42 @@ function initBombList(rows, cols) {
 function setFieldNumbers(maxRows, maxColumns) {
     _board.forEach((row) => {
         row.forEach((fieldObj) => {
-                //ignore bombs since they shouldnt have numbers
-                if (fieldObj.isBomb) {
-                    createFieldElement(fieldObj);
-                    return;
-                }
+            //ignore bombs since they shouldnt have numbers
+            if (fieldObj.isBomb) {
+                createFieldElement(fieldObj);
+                return;
+            }
 
-                let neighboringBombs = 0;
-                let rowForNeighbors = 0;
-                
-                //will check the rows between the current field (row-1 = upper field, row+1 = lower field)
-                for (let r = fieldObj.row-1; r < fieldObj.row+2; r++) {
+            let neighboringBombs = 0;
+            let rowForNeighbors = 0;
+            
+            //will check the rows between the current field (row-1 = upper field, row+1 = lower field)
+            for (let r = fieldObj.row-1; r < fieldObj.row+2; r++) {
+                //prevent going outside of the board index
+                if (r < 0 || r > maxRows-1) {
+                    continue;
+                }
+                fieldObj.neighbors[rowForNeighbors] = [];
+                let colForNeighbors = 0;
+
+                //will check the columns beside the current field (col-1 = left field, col+1 = right field)
+                for (let c = fieldObj.column-1; c < fieldObj.column+2; c++) {
                     //prevent going outside of the board index
-                    if (r < 0 || r > maxRows-1) {
+                    if (c < 0 || c > maxColumns-1) {
                         continue;
                     }
-                    fieldObj.neighbors[rowForNeighbors] = [];
-                    let colForNeighbors = 0;
 
-                    //will check the columns beside the current field (col-1 = left field, col+1 = right field)
-                    for (let c = fieldObj.column-1; c < fieldObj.column+2; c++) {
-                        //prevent going outside of the board index
-                        if (c < 0 || c > maxColumns-1) {
-                            continue;
-                        }
-
-                        const neighbor = _board[r][c];
-                        fieldObj.neighbors[rowForNeighbors][colForNeighbors] = neighbor;
-                        neighboringBombs = neighbor.isBomb ? neighboringBombs+1 : neighboringBombs
-                        colForNeighbors++;
-                    }
-                    rowForNeighbors++;
+                    const neighbor = _board[r][c];
+                    fieldObj.neighbors[rowForNeighbors][colForNeighbors] = neighbor;
+                    neighboringBombs = neighbor.isBomb ? neighboringBombs+1 : neighboringBombs
+                    colForNeighbors++;
                 }
-                
-                fieldObj.neighboringBombs = neighboringBombs == 0 ? _noNeighboringBombs : neighboringBombs;
-                createFieldElement(fieldObj);
-            })
+                rowForNeighbors++;
+            }
+            
+            fieldObj.neighboringBombs = neighboringBombs == 0 ? _noNeighboringBombs : neighboringBombs;
+            createFieldElement(fieldObj);
+        })
     })
 }
 
@@ -210,7 +213,7 @@ function createFieldElement(fieldObj) {
     let fieldEl = document.createElement("button");
     fieldEl.className = "field";
     
-    fieldEl.onclick = () => fieldClicked(fieldObj);
+    fieldEl.onclick = () => onFieldClicked(fieldObj);
     fieldEl.oncontextmenu = (e) => setFlag(e, fieldObj);
     fieldEl.onmouseenter = () => onFieldEnter(fieldObj);
     fieldEl.onmouseleave = () => onFieldLeave(fieldObj);
@@ -263,7 +266,7 @@ function onFieldLeave(fieldObj) {
 }
 
 //will reveal the clicked field and performs a specific action based on its attributes
-function fieldClicked(fieldObj) {
+function onFieldClicked(fieldObj) {
     if (fieldObj.isFlagged) {
         return;
     }
@@ -309,16 +312,16 @@ function fieldChord(fieldObj) {
 
     //check if theres a correct amount of flags placed around it
     if (flaggedNeighbors >= fieldObj.neighboringBombs){
-            fieldObj.neighbors.forEach((fieldRows) => {
-                fieldRows.forEach((neighbor) => {
-                    //ignore self, uncovered and flagged fields
-                    if (neighbor === fieldObj || neighbor.isRevealed || neighbor.isFlagged) {
-                        return;
-                    }
-                    
-                    //uncover neigbors
-                    fieldClicked(neighbor);
-                })
+        fieldObj.neighbors.forEach((fieldRows) => {
+            fieldRows.forEach((neighbor) => {
+                //ignore self, uncovered and flagged fields
+                if (neighbor === fieldObj || neighbor.isRevealed || neighbor.isFlagged) {
+                    return;
+                }
+                
+                //uncover neigbors
+                onFieldClicked(neighbor);
+            })
         })
     }
 }
@@ -341,6 +344,7 @@ function uncoverNeighboringFields(fieldObj) {
             if (neighbor === fieldObj || neighbor.isRevealed) {
                 return;
             }
+
             neighbor.isRevealed = true;
             neighbor.htmlElement.className = "field";
             neighbor.htmlElement.textContent = neighbor.neighboringBombs;
@@ -399,7 +403,7 @@ function revealBoard(wonGame) {
             const fieldEl = fieldObj.htmlElement;
             
             fieldEl.onclick = ( ) => { };
-            fieldEl.oncontextmenu = ( ) => { };
+            fieldEl.oncontextmenu = (e) => { e.preventDefault(); };
             fieldEl.onmouseenter = ( ) => { };
 
             fieldEl.textContent = fieldObj.isBomb ? "💣" : fieldObj.neighboringBombs;
@@ -435,12 +439,13 @@ function setFlag(cursor, fieldObj) {
 
 //resets the game by refilling the board with the same fieldSize
 function resetGame(newFieldSize) {
-        changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
-                                                          _lossStreakCount+1 == 2 ? "nd " : 
-                                                          _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);    setUpField(newFieldSize ?? _currentBoardRowAndCol); 
+    changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
+                                                        _lossStreakCount+1 == 2 ? "nd " : 
+                                                        _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);
+    setUpField(newFieldSize ?? _currentBoardSize); 
 }
 
-//accepts the custom size if its valid
+//accepts the custom size if its valid and resets the board
 function confirmCustomSize() {
     let customRow = parseInt(document.getElementById("customRow").value);
     let customColumn = parseInt(document.getElementById("customColumn").value);

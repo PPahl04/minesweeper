@@ -59,7 +59,7 @@ h3 {
     font-size: 100%;
 }
 
-#gameField {
+#gameBoard {
     display: grid;
     justify-content: center;
     grid-template-rows: auto;
@@ -70,7 +70,7 @@ h3 {
     border: 5px inset #7a428a;
 }
 
-#gameField.won {
+#gameBoard.won {
     background: #f2ffef;
 }
 
