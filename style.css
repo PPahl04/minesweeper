@@ -19,11 +19,11 @@ body {
     align-items: center;
     flex-direction: column;
     background: #f8deff;
+    color: #451b50;
 }
 
 h1,
-.field-sizes {
-    color: #451b50;
+.customizable {
     border: 1px solid #7a428a;
     padding: 5px;
     background: #fbefff;
@@ -55,8 +55,16 @@ h2 {
     font-size: 100%;
 }
 
-h3 {
+.user-defined h3 {
     font-size: 100%;
+}
+
+.user-defined {
+    border-top: 1px #7a428a solid;
+}
+ 
+.user-defined:first-child {
+    border-top: none;
 }
 
 #gameBoard {
@@ -74,31 +82,38 @@ h3 {
     background: #f2ffef;
 }
 
-.field-sizes {
-    padding: 10px;
+.customizable {
+    padding: 15px;
+    width: 400px;
 }
 
-.custom-size {
+.buttons {
+    display: flex;
+    justify-content: space-around;
+}
+.user-defined {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
-.custom-size input {
+.user-defined input {
     width: 60px;
 }
 
-.custom-size > p,
-.custom-size > button,
-.custom-size > input {
+.user-defined > p,
+.user-defined > button,
+.user-defined > input {
     margin: 10px 0px 5px;
 }
+
 
 button {
     border: 1px #7a428a solid;
     background: #e6a9f7;
     color: #7a428a;
     font-size: 100%;
+    padding: 5px;
 }
 
 button:hover {
@@ -131,8 +146,9 @@ button:hover {
 .board-info {
     display: flex;
     justify-content: space-around;
-    width: 25em;
+    width: 450px;
     margin: 0 auto 20px;
+    padding: 5px;
     border: 4px inset #7a428a;
     border-top: 4px inset #7a428a;
     transform: translateY(-4px);
