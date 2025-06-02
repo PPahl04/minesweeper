@@ -127,8 +127,17 @@ button:hover {
     border-bottom: none;
 }
 
+
 .board-info {
     display: flex;
     justify-content: space-around;
-    width: 70%;
+    width: 30em;
+    margin: 0 auto 20px;
+    border: 4px inset #7a428a;
+    border-top: none;
+    background: #fbefff;
+}
+
+.board-info > p {
+    margin: 10px auto;
 }
