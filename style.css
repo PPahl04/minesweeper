@@ -127,7 +127,7 @@ button:hover {
     border-bottom: none;
 }
 
-.debug {
+.board-info {
     display: flex;
     justify-content: space-around;
     width: 70%;
