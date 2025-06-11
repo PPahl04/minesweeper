@@ -3,16 +3,23 @@ let _board = []
 
 let _currentBoardSize;
 let _fieldAmount;
+
+//reuse lifes in future rounds
+let _originalLifeAmount = 1;
+let _firstRound = true;
+let _lifeAmount;
 let _bombsInGF;
 
 //htmlElements
 let _remainingFlags;
 let _boardProgress;
 let _gameBoard;
+let _lifes;
 
 //player specific elements
 let _lossStreakCount = 0;
 let _uncoveredFields;
+let _roundStarted;
 let _setFlags;
 
 const _fracNumBombs = 4;
@@ -96,8 +103,9 @@ class Field {
 function setUpField(newBoardSize) {
     //get htmlElements
     _remainingFlags = document.getElementById("remainingFlags");
-    _gameBoard = document.getElementById("gameBoard");
     _boardProgress = document.getElementById("boardProgress");
+    _gameBoard = document.getElementById("gameBoard");
+    _lifes = document.getElementById("lifes");
 
     let maxRows = newBoardSize.split("x")[0];
     let maxColumns = newBoardSize.split("x")[1];
@@ -110,7 +118,11 @@ function setUpField(newBoardSize) {
     
     _currentBoardSize = newBoardSize;
     let bombList = initBombList(maxRows, maxColumns);
+
     _setFlags = 0;
+    _roundStarted = false;
+    _lifeAmount = _originalLifeAmount;
+    _lifes.textContent = `Lifes: ${_lifeAmount}`;
     _uncoveredFields = 0;
     
     _gameBoard.className = "";
@@ -129,6 +141,15 @@ function setUpField(newBoardSize) {
             const fieldObj = new Field(r, c, isBomb);
             _board[r][c] = fieldObj;
         }   
+    }
+
+    //set number input width to its placeholder text
+    if (_firstRound) {
+        var inpNums = document.querySelectorAll('input');
+        for(i = 0; i < inpNums.length; i++){
+            inpNums[i].setAttribute('size',inpNums[i].getAttribute('placeholder').length);
+        }
+        _firstRound = false;
     }
 
     setFieldNumbers(maxRows, maxColumns);
@@ -267,13 +288,25 @@ function onFieldLeave(fieldObj) {
 
 //will reveal the clicked field and performs a specific action based on its attributes
 function onFieldClicked(fieldObj) {
+    _roundStarted = true;
+
     if (fieldObj.isFlagged) {
         return;
     }
     else if (fieldObj.isBomb) {
-        revealBoard(false);
-        changeTitles("Game Over!", ["You lost the game!", "Better luck next time", "Stay determined!"]);
-        return;
+        _lifeAmount--;
+        _lifes.textContent = `Lifes: ${_lifeAmount}`;
+        
+        //treat bomb as flag for chording
+        fieldObj.isFlagged = true;
+        fieldObj.htmlElement.onclick = ( ) => { };
+        fieldObj.htmlElement.oncontextmenu = (e) => {e.preventDefault()};
+
+        if (_lifeAmount <= 0) {
+            revealBoard(false);
+            changeTitles("Game Over!", ["You lost the game!", "Better luck next time", "Stay determined!"]);
+            return;
+        }
     }
     // player wants to use chord
     else if(fieldObj.isRevealed) {
@@ -282,9 +315,9 @@ function onFieldClicked(fieldObj) {
     }
 
     fieldObj.isRevealed = true;
-    fieldObj.htmlElement.textContent = fieldObj.neighboringBombs;
+    fieldObj.htmlElement.textContent = fieldObj.isBomb ? "💣" : fieldObj.neighboringBombs;
     fieldObj.htmlElement.className = fieldObj.neighboringBombs == _noNeighboringBombs ? "empty field" : "field";
-    changeBoardProgress();
+    changeBoardProgress(fieldObj.isBomb);
     
     if (fieldObj.neighboringBombs == _noNeighboringBombs) {
         uncoverNeighboringFields(fieldObj);
@@ -326,9 +359,11 @@ function fieldChord(fieldObj) {
     }
 }
 
-function changeBoardProgress() {
+function changeBoardProgress(fieldWasBomb) {
+    if (!fieldWasBomb) {
     _uncoveredFields++;
     _boardProgress.textContent = `Covered fields: ${(_fieldAmount - _bombsInGF) -_uncoveredFields}/${_fieldAmount - _bombsInGF}`;
+    }
 }
 
 //uncovers neighbors if the current field has no neigboring bombs
@@ -450,13 +485,40 @@ function confirmCustomSize() {
     let customRow = parseInt(document.getElementById("customRow").value);
     let customColumn = parseInt(document.getElementById("customColumn").value);
 
-    if (!(customRow > 4 && customRow < 100 &&
-          customColumn > 4 && customColumn < 100)) {
+    if (customRow < 4 || customRow > 100 || isNaN(customRow) ||
+        customColumn < 4 || customColumn > 100 || isNaN(customColumn)) {
         alert("Please choose a value between 5 and 99.");
         return;
     }
+
+    //warn user about this function resetting the round
+    if (_roundStarted && !confirm("Changing the board size will also reset the current round."+
+                                 "\nAre you sure you want to continue?")) {
+        return;
+    }
+
     changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
                                                       _lossStreakCount+1 == 2 ? "nd " : 
                                                       _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);
     setUpField(`${customRow}x${customColumn}`);
+}
+
+//change the life amount and reset the game
+function confirmLifeAmount() {
+    let userAmount = parseInt(document.getElementById("customLifes").value);
+
+    if (userAmount > 99 || userAmount < 1 || isNaN(userAmount)) {
+        alert("Please choose a life amount between 1 and 99");
+        return;
+    }
+
+    //warn user about this function resetting the round
+    if (_roundStarted && !confirm("Changing the life amount will also reset the current round."+
+                                "\nAre you sure you want to continue?")) {
+        return;
+    }
+
+    _originalLifeAmount = userAmount;
+    _lifes.textContent = `Lifes: ${_lifeAmount}`;
+    setUpField(_currentBoardSize);
 }

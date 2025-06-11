@@ -16,18 +16,27 @@
         <div class="board-info">
             <p id="remainingFlags"></p> 
             <p id="boardProgress"></p> 
+            <p id="lifes"></p>
         </div>
-        <div class="field-sizes">
-            <h2>Change Diffuculty:</h2>
-            <button onclick="resetGame('5x15')">easy - 5x15</button>
-            <button onclick="resetGame('10x20')">normal - 10x20</button>
-            <button onclick="resetGame('20x30')">hard - 20x30</button>
-            <h2 class="custom-size-title">Custom size:</h2>
-            <div class="custom-size">
+        <div class="customizable">
+            <h2>Change Difficulty</h2>
+            <div class="buttons">
+                <button onclick="resetGame('5x15')">easy - 5x15</button>
+                <button onclick="resetGame('10x20')">normal - 10x20</button>
+                <button onclick="resetGame('20x30')">hard - 20x30</button>
+            </div>
+            <h2 class="custom-size-title">User defined</h2>
+            <div class="user-defined">
+                <h3>Custom size:</h3>
                 <input type="number" id="customRow" min="5" max="99" placeholder="row">
                 <p>X</p>
                 <input type="number" id="customColumn" min="5" max="99" placeholder="column">
-                <button class="confirm-custom-size" onclick="confirmCustomSize()">Confirm</button>
+                <button onclick="confirmCustomSize()">Confirm size</button>
+            </div>
+            <div class="user-defined">
+                <h3>Lifes:</h3>
+                <input type="number" id="customLifes" min="1" max="99" placeholder="amount">
+                <button onclick="confirmLifeAmount()">Confirm lifes</button>
             </div>
         </div>
     </body>
