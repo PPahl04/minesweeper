@@ -97,10 +97,6 @@ h2 {
     justify-content: space-between;
 }
 
-.user-defined input {
-    width: 60px;
-}
-
 .user-defined > p,
 .user-defined > button,
 .user-defined > input {

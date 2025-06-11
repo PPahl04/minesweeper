@@ -6,6 +6,7 @@ let _fieldAmount;
 
 //reuse lifes in future rounds
 let _originalLifeAmount = 1;
+let _firstRound = true;
 let _lifeAmount;
 let _bombsInGF;
 
@@ -18,7 +19,7 @@ let _lifes;
 //player specific elements
 let _lossStreakCount = 0;
 let _uncoveredFields;
-let roundStarted;
+let _roundStarted;
 let _setFlags;
 
 const _fracNumBombs = 4;
@@ -119,7 +120,7 @@ function setUpField(newBoardSize) {
     let bombList = initBombList(maxRows, maxColumns);
 
     _setFlags = 0;
-    roundStarted = false;
+    _roundStarted = false;
     _lifeAmount = _originalLifeAmount;
     _lifes.textContent = `Lifes: ${_lifeAmount}`;
     _uncoveredFields = 0;
@@ -140,6 +141,15 @@ function setUpField(newBoardSize) {
             const fieldObj = new Field(r, c, isBomb);
             _board[r][c] = fieldObj;
         }   
+    }
+
+    //set number input width to its placeholder text
+    if (_firstRound) {
+        var inpNums = document.querySelectorAll('input');
+        for(i = 0; i < inpNums.length; i++){
+            inpNums[i].setAttribute('size',inpNums[i].getAttribute('placeholder').length);
+        }
+        _firstRound = false;
     }
 
     setFieldNumbers(maxRows, maxColumns);
@@ -278,7 +288,7 @@ function onFieldLeave(fieldObj) {
 
 //will reveal the clicked field and performs a specific action based on its attributes
 function onFieldClicked(fieldObj) {
-    roundStarted = true;
+    _roundStarted = true;
 
     if (fieldObj.isFlagged) {
         return;
@@ -482,7 +492,7 @@ function confirmCustomSize() {
     }
 
     //warn user about this function resetting the round
-    if (roundStarted && !confirm("Changing the board size will also reset the current round."+
+    if (_roundStarted && !confirm("Changing the board size will also reset the current round."+
                                  "\nAre you sure you want to continue?")) {
         return;
     }
@@ -503,7 +513,7 @@ function confirmLifeAmount() {
     }
 
     //warn user about this function resetting the round
-    if (roundStarted && !confirm("Changing the life amount will also reset the current round."+
+    if (_roundStarted && !confirm("Changing the life amount will also reset the current round."+
                                 "\nAre you sure you want to continue?")) {
         return;
     }
