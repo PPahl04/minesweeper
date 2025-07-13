@@ -441,9 +441,16 @@ function revealBoard(wonGame) {
             fieldEl.oncontextmenu = (e) => { e.preventDefault(); };
             fieldEl.onmouseenter = ( ) => { };
 
-            fieldEl.textContent = fieldObj.isBomb ? "💣" : fieldObj.neighboringBombs;
-            fieldEl.className = "field";
-            fieldEl.className = fieldObj.neighboringBombs == _noNeighboringBombs ? "empty field" : fieldEl.className;
+            //if lost then only reveal bombs and ignore already revealed fields
+            if (!wonGame) {
+                if (!fieldObj.isRevealed) { 
+                    fieldEl.textContent = fieldObj.isBomb ? "💣" : "";
+                }
+            }
+            //if won then reveal all bombs (only bombs are unrevealed on a win)
+            else if (fieldObj.isBomb){
+                fieldEl.textContent = "💣";
+            }
             fieldEl.className = wonGame ? fieldEl.className+" won-game finished" : fieldEl.className+" finished";
         })
     });
