@@ -427,8 +427,8 @@ function isGameFinished() {
     return isFinished;
 }
 
-//this reveals all fields and disable clicking on them
-//will only be called when the game is finished or lost
+//reveals all bombs and disables events of all fields
+//will only be called when the game is finished by winning or losing
 function revealBoard(wonGame) {
     _gameBoard.className = wonGame ? _gameBoard.className+"won" : _gameBoard.className; 
     _lossStreakCount = wonGame ? 0 : _lossStreakCount+1;
@@ -441,16 +441,15 @@ function revealBoard(wonGame) {
             fieldEl.oncontextmenu = (e) => { e.preventDefault(); };
             fieldEl.onmouseenter = ( ) => { };
 
-            //if lost then only reveal bombs and ignore already revealed fields
-            if (!wonGame) {
-                if (!fieldObj.isRevealed) { 
-                    fieldEl.textContent = fieldObj.isBomb ? "💣" : "";
-                }
-            }
-            //if won then reveal all bombs (only bombs are unrevealed on a win)
-            else if (fieldObj.isBomb){
+            //reveal all uncovered bombs
+            if (!fieldObj.isRevealed && fieldObj.isBomb) { 
                 fieldEl.textContent = "💣";
             }
+
+            if (fieldEl.className.includes("hovering")) {
+                fieldEl.className = fieldEl.className.substring(0, fieldEl.className.indexOf("hovering")-1);
+            }
+
             fieldEl.className = wonGame ? fieldEl.className+" won-game finished" : fieldEl.className+" finished";
         })
     });
