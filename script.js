@@ -500,15 +500,6 @@ function confirmCustomSize() {
         return;
     }
 
-    // //warn user about the reset
-    // if (_roundStarted && !isGameFinished() && !confirm("Applying new settings will also reset the current round."+
-    //                             "\nAre you sure you want to continue?")) {
-    //     return;
-    // }
-
-    // changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
-    //                                                   _lossStreakCount+1 == 2 ? "nd " : 
-    //                                                   _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);
     resetGame(`${customRow}x${customColumn}`);
 }
 
