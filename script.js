@@ -412,8 +412,11 @@ function changeTitles(titleText, subtitleText) {
 
 //iterates through the entire board to check if all non bomb fields have been revealed (game is finished)
 function isGameFinished() {
-    let isFinished = true;
+    if (_lifeAmount <= 0) {
+        return true;
+    }
 
+    let isFinished = true;
     _board.forEach((row) => {
         row.forEach((fieldObj) => {
                 //ignore bombs since they shouldnt be uncovered to win
@@ -474,6 +477,12 @@ function setFlag(cursor, fieldObj) {
 
 //resets the game by refilling the board with the same fieldSize
 function resetGame(newFieldSize) {
+    //warn user about the reset if a new size has been choosen
+    if (newFieldSize != undefined && _roundStarted && !isGameFinished() && !confirm("Applying new settings will also reset the current round."+
+                                "\nAre you sure you want to continue?")) {
+        return;
+    }
+
     changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
                                                         _lossStreakCount+1 == 2 ? "nd " : 
                                                         _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);
@@ -491,16 +500,16 @@ function confirmCustomSize() {
         return;
     }
 
-    //warn user about this function resetting the round
-    if (_roundStarted && !confirm("Changing the board size will also reset the current round."+
-                                 "\nAre you sure you want to continue?")) {
-        return;
-    }
+    // //warn user about the reset
+    // if (_roundStarted && !isGameFinished() && !confirm("Applying new settings will also reset the current round."+
+    //                             "\nAre you sure you want to continue?")) {
+    //     return;
+    // }
 
-    changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
-                                                      _lossStreakCount+1 == 2 ? "nd " : 
-                                                      _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);
-    setUpField(`${customRow}x${customColumn}`);
+    // changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
+    //                                                   _lossStreakCount+1 == 2 ? "nd " : 
+    //                                                   _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);
+    resetGame(`${customRow}x${customColumn}`);
 }
 
 //change the life amount and reset the game
@@ -512,8 +521,8 @@ function confirmLifeAmount() {
         return;
     }
 
-    //warn user about this function resetting the round
-    if (_roundStarted && !confirm("Changing the life amount will also reset the current round."+
+    //warn user about the reset
+    if (_roundStarted && !isGameFinished() && !confirm("Applying new settings will also reset the current round."+
                                 "\nAre you sure you want to continue?")) {
         return;
     }
