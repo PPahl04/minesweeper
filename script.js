@@ -440,6 +440,7 @@ function revealBoard(wonGame) {
             fieldEl.onclick = ( ) => { };
             fieldEl.oncontextmenu = (e) => { e.preventDefault(); };
             fieldEl.onmouseenter = ( ) => { };
+            fieldEl.onmouseleave = ( ) => { };
 
             //reveal all uncovered bombs
             if (!fieldObj.isRevealed && fieldObj.isBomb) { 
