@@ -483,9 +483,7 @@ function resetGame(newFieldSize) {
         return;
     }
 
-    changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
-                                                        _lossStreakCount+1 == 2 ? "nd " : 
-                                                        _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);
+    changeTitlesOnLoss();
     setUpField(newFieldSize ?? _currentBoardSize); 
 }
 
@@ -520,5 +518,13 @@ function confirmLifeAmount() {
 
     _originalLifeAmount = userAmount;
     _lifes.textContent = `Lifes: ${_lifeAmount}`;
+
+    changeTitlesOnLoss();
     setUpField(_currentBoardSize);
+}
+
+function changeTitlesOnLoss() {
+    changeTitles("Good luck!", [_lossStreakCount+1 + (_lossStreakCount+1 == 1 ? "st ":
+                                                      _lossStreakCount+1 == 2 ? "nd " : 
+                                                      _lossStreakCount+1 == 3 ? "rd " : "th ")+ "try's a charm"]);
 }
