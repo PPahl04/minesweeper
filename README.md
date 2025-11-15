@@ -1,3 +1,8 @@
+The classic minesweeper game recreated within a little html project with css and javascript.  
+[Tutorial to minesweeper.](https://www.youtube.com/watch?v=9Qh6fUlhUrs&ab_channel=TSSSwag)
+
+---
+
 ## Functions
 
 - revealing field by a click
@@ -8,6 +13,26 @@
 - custom field sizes
 - subtitle and title change based on the game situation
 - counting the number of lost rounds
+
+---
+## Screenshots
+The startscreen.
+![Startsreen](images/StartScreen.jpg "Stertscreen")
+\
+\
+\
+Game Over
+![Game Over](images/GameOver.png "Game Over")
+\
+\
+\
+Restart after a round
+![Retry](images/Retry.png "Page after retrying")
+\
+\
+\
+Won a round
+![Won Game](images/FInishedGame.png "Page after winning")
 
 ---
 
@@ -27,7 +52,3 @@
 2. Run html
     ```bash
     index.html
-
----
-
-[Tutorial to minesweeper.](https://www.youtube.com/watch?v=9Qh6fUlhUrs&ab_channel=TSSSwag)
